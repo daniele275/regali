@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chi regala a chi</title>
+<meta name="description" content="Estrazione casuale dei regali: nessuno fa il regalo al proprio partner.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#E7EEEA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101A16" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Regali">
+<link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("font.woff2") format("woff2");
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
+}
+:root {
+  --bg: #E7EEEA;
+  --surface: #F6FAF8;
+  --field: #FFFFFF;
+  --ink: #16241E;
+  --ink-soft: #52635B;
+  --line: #C3D2CA;
+  --ribbon: #B3203A;
+  --on-ribbon: #FFFFFF;
+  --gold: #9A6F14;
+  --warn: #8C3A00;
+  --focus: #1F6F5C;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101A16;
+    --surface: #17241F;
+    --field: #0C1512;
+    --ink: #E7F0EB;
+    --ink-soft: #9FB3A9;
+    --line: #2D3F37;
+    --ribbon: #EE5269;
+    --on-ribbon: #1B080C;
+    --gold: #E2B65C;
+    --warn: #F2B35A;
+    --focus: #6FD1B4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101A16;
+  --surface: #17241F;
+  --field: #0C1512;
+  --ink: #E7F0EB;
+  --ink-soft: #9FB3A9;
+  --line: #2D3F37;
+  --ribbon: #EE5269;
+  --on-ribbon: #1B080C;
+  --gold: #E2B65C;
+  --warn: #F2B35A;
+  --focus: #6FD1B4;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-optical-sizing: auto;
+  font-size: 17px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 22px 20px 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 12vw, 3.3rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  margin: 6px 0 12px;
+}
+.lede { margin: 0; color: var(--ink-soft); max-width: 36ch; }
+
+.steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  counter-reset: s;
+}
+.steps li {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  padding-top: 8px;
+  border-top: 3px solid var(--line);
+}
+.steps li::before { counter-increment: s; content: counter(s) "\00a0\00a0"; font-weight: 700; }
+.steps li.done { border-top-color: var(--ink-soft); }
+.steps li[aria-current="step"] { color: var(--ink); font-weight: 700; border-top-color: var(--ribbon); }
+
+.panel { flex: 1; display: flex; flex-direction: column; }
+.panel h2 {
+  font-size: 1.55rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 30px 0 12px;
+}
+.panel h2:focus { outline: none; }
+.panel h3 { font-size: 1.05rem; font-weight: 700; color: var(--ink-soft); margin: 22px 0 10px; }
+
+/* contatori */
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.counter:first-of-type { border-top: 1px solid var(--line); }
+.counter-label { font-size: 1.1rem; }
+.counter-ctrl { display: flex; align-items: center; gap: 8px; }
+.round {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.round:disabled { opacity: 0.35; cursor: default; }
+.counter output {
+  min-width: 2.4ch;
+  text-align: center;
+  font-size: 1.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.summary { margin: 16px 0 0; color: var(--ink-soft); }
+.warn { margin: 12px 0 0; color: var(--warn); }
+
+/* nomi */
+.field {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--ink);
+}
+.field::placeholder { color: var(--ink-soft); opacity: 0.7; }
+.field[aria-invalid="true"] { border-color: var(--warn); }
+.couple {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.amp {
+  width: 1.3em;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: var(--ribbon);
+}
+.singles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.status { margin: 16px 0 0; color: var(--ink-soft); min-height: 1.45em; }
+.status.is-warn { color: var(--warn); }
+
+/* risultato */
+.sub { margin: 0 0 14px; color: var(--ink-soft); }
+.seal {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transform: translateY(-3px);
+}
+.chain {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 0 0 36px;
+  position: relative;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.chain::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 22px;
+  bottom: 22px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--ribbon);
+}
+.chain.confirmed::before { background: var(--gold); }
+.chain li { position: relative; padding: 9px 0; font-size: 1.1rem; line-height: 1.3; }
+.chain li::before {
+  content: "";
+  position: absolute;
+  left: -32px;
+  top: 50%;
+  width: 18px; height: 18px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 4px solid var(--ribbon);
+}
+.chain.confirmed li::before { border-color: var(--gold); }
+.chain .name { font-weight: 750; font-size: 1.3rem; letter-spacing: -0.01em; }
+.chain .verb { color: var(--ink-soft); }
+.closing { margin: 14px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+.textbtn {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* barra azioni */
+.actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: 18px 0 calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.spacer { height: 18px; }
+.btn {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-height: 54px;
+  padding: 0 20px;
+  border-radius: 14px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn.primary { flex: 1; background: var(--ribbon); border-color: var(--ribbon); color: var(--on-ribbon); }
+.btn.grow { flex: 1; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.start { font-size: 1.25rem; letter-spacing: 0.02em; animation: pop 0.28s ease-out; }
+.hint { flex: 1; color: var(--ink-soft); font-size: 0.95rem; }
+
+button:focus-visible, .field:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 10px);
+  max-width: calc(100% - 32px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 20;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.reveal { animation: rise 0.34s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes pop { from { opacity: 0; transform: scale(0.94); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>Chi regala a chi?</h1>
+    <p class="lede">Estrazione casuale dei regali: ognuno fa un regalo a una persona, e nessuno lo fa al proprio partner.</p>
+    <ol class="steps" aria-label="Passaggi">
+      <li data-step="1">Persone</li>
+      <li data-step="2">Nomi</li>
+      <li data-step="3">Estrazione</li>
+    </ol>
+  </header>
+
+  <!-- Passo 1 -->
+  <section class="panel" id="p1" hidden>
+    <h2 tabindex="-1">Quanti siete?</h2>
+    <div class="counter">
+      <span class="counter-label" id="lbl-n">Persone in tutto</span>
+      <div class="counter-ctrl">
+        <button class="round" type="button" data-act="n-" aria-label="Una persona in meno">−</button>
+        <output id="n-val" aria-labelledby="lbl-n" aria-live="polite"></output>
+        <button class="round" type="button" data-act="n+" aria-label="Una persona in più">+</button>
+      </div>
+    </div>
+    <div class="counter">
+      <span class="counter-label" id="lbl-c">Coppie</span>
+      <div class="counter-ctrl">
+        <button class="round" type="button" data-act="c-" aria-label="Una coppia in meno">−</button>
+        <output id="c-val" aria-labelledby="lbl-c" aria-live="polite"></output>
+        <button class="round" type="button" data-act="c+" aria-label="Una coppia in più">+</button>
+      </div>
+    </div>
+    <p class="summary" id="summary"></p>
+    <p class="warn" id="feas" hidden></p>
+    <div class="actions">
+      <button class="btn primary" type="button" id="to-names">Inserisci i nomi</button>
+    </div>
+  </section>
+
+  <!-- Passo 2 -->
+  <section class="panel" id="p2" hidden>
+    <h2 tabindex="-1">Chi partecipa?</h2>
+    <div id="couples-group">
+      <h3>Coppie</h3>
+      <div id="couples"></div>
+    </div>
+    <div id="singles-group">
+      <h3>Single</h3>
+      <div class="singles" id="singles"></div>
+    </div>
+    <p class="status" id="names-status" aria-live="polite"></p>
+    <div class="actions">
+      <button class="btn" type="button" id="back-1">Indietro</button>
+      <span class="hint" id="start-hint">Completa i nomi per avviare l’estrazione.</span>
+      <button class="btn primary start" type="button" id="start" hidden>Start</button>
+    </div>
+  </section>
+
+  <!-- Passo 3 -->
+  <section class="panel" id="p3" hidden>
+    <h2 tabindex="-1" id="res-title">Ecco l’estrazione</h2>
+    <p class="sub" id="res-sub"></p>
+    <ol class="chain" id="chain"></ol>
+    <p class="closing">Il giro si chiude: ognuno fa un solo regalo e ne riceve uno solo.</p>
+    <button class="textbtn" type="button" id="edit-names">Modifica i nomi</button>
+    <div class="actions" id="act-draft">
+      <button class="btn grow" type="button" id="redraw">Nuova estrazione</button>
+      <button class="btn primary" type="button" id="confirm">Conferma</button>
+    </div>
+    <div class="actions" id="act-done" hidden>
+      <button class="btn grow" type="button" id="restart">Ricomincia</button>
+      <button class="btn primary" type="button" id="copy">Copia lista</button>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'chi-regala-a-chi:v1';
+  var MIN_N = 2, MAX_N = 60;
+
+  var state = {
+    step: 1, n: 4, c: 1,
+    couples: [['', '']],
+    singles: ['', ''],
+    result: null, confirmed: false, round: 0
+  };
+
+  /* ---------- salvataggio locale ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (!s || typeof s !== 'object') return;
+      if (typeof s.n === 'number') state.n = s.n;
+      if (typeof s.c === 'number') state.c = s.c;
+      if (Array.isArray(s.couples)) state.couples = s.couples.map(function (p) {
+        return Array.isArray(p) ? [String(p[0] || ''), String(p[1] || '')] : ['', ''];
+      });
+      if (Array.isArray(s.singles)) state.singles = s.singles.map(function (x) { return String(x || ''); });
+      if (Array.isArray(s.result)) state.result = s.result;
+      state.confirmed = !!s.confirmed;
+      state.round = typeof s.round === 'number' ? s.round : 0;
+      if (s.step === 1 || s.step === 2 || s.step === 3) state.step = s.step;
+    } catch (e) { /* storage non disponibile: si riparte da zero */ }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignorato */ }
+  }
+
+  /* ---------- utilità ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+
+  function normalize() {
+    state.n = Math.max(MIN_N, Math.min(MAX_N, Math.round(state.n)));
+    state.c = Math.max(0, Math.min(Math.floor(state.n / 2), Math.round(state.c)));
+    while (state.couples.length < state.c) state.couples.push(['', '']);
+    state.couples.length = state.c;
+    var s = state.n - 2 * state.c;
+    while (state.singles.length < s) state.singles.push('');
+    state.singles.length = s;
+  }
+
+  function feasibility(n, c) {
+    if (n === 2 && c === 1) {
+      return 'Con una sola coppia e nessun altro, ognuno dei due potrebbe regalare solo al partner: aggiungi almeno un’altra persona.';
+    }
+    if (n === 3 && c === 1) {
+      return 'Con tre persone e una coppia l’estrazione è impossibile: i due partner potrebbero regalare solo alla terza persona, che però riceve un solo regalo. Aggiungi una persona o togli la coppia.';
+    }
+    return null;
+  }
+
+  function summaryText(n, c) {
+    var s = n - 2 * c;
+    var persone = n + ' persone';
+    var coppie = c === 1 ? '1 coppia' : c + ' coppie';
+    if (c === 0) return persone + ', tutte single.';
+    if (s === 0) return persone + ': ' + coppie + ', nessun single.';
+    return persone + ': ' + coppie + ' e ' + s + ' single.';
+  }
+
+  function allNames() {
+    var list = [];
+    state.couples.forEach(function (p, i) {
+      list.push({ name: p[0].trim(), couple: i });
+      list.push({ name: p[1].trim(), couple: i });
+    });
+    state.singles.forEach(function (x) { list.push({ name: x.trim(), couple: null }); });
+    return list;
+  }
+
+  function namesProblem() {
+    var list = allNames();
+    var missing = list.filter(function (x) { return !x.name; }).length;
+    if (missing) return { msg: missing === 1 ? 'Manca un nome.' : 'Mancano ' + missing + ' nomi.', dup: null };
+    var seen = {};
+    for (var i = 0; i < list.length; i++) {
+      var k = list[i].name.toLocaleLowerCase('it');
+      if (seen[k]) {
+        return { msg: '«' + list[i].name + '» compare due volte: aggiungi un’iniziale per distinguere le due persone.', dup: k };
+      }
+      seen[k] = true;
+    }
+    return null;
+  }
+
+  function randInt(k) {
+    if (window.crypto && crypto.getRandomValues) {
+      var a = new Uint32Array(1);
+      var lim = Math.floor(4294967296 / k) * k;
+      var x;
+      do { crypto.getRandomValues(a); x = a[0]; } while (x >= lim);
+      return x % k;
+    }
+    return Math.floor(Math.random() * k);
+  }
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = randInt(i + 1);
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function sameMapping(a, b) {
+    if (!b || a.length !== b.length) return false;
+    var m = {};
+    b.forEach(function (p) { m[p[0]] = p[1]; });
+    return a.every(function (p) { return m[p[0]] === p[1]; });
+  }
+
+  /* Estrae un unico giro A → B → C → … → A in cui nessuno regala al partner. */
+  function drawCycle(list, previous) {
+    var n = list.length;
+    var partner = list.map(function (x, i) {
+      if (x.couple === null) return -1;
+      for (var j = 0; j < n; j++) if (j !== i && list[j].couple === x.couple) return j;
+      return -1;
+    });
+    var idx = [];
+    for (var i = 0; i < n; i++) idx.push(i);
+    var repeats = 0, fallback = null;
+    for (var t = 0; t < 200000; t++) {
+      shuffle(idx);
+      var ok = true;
+      for (var k = 0; k < n; k++) {
+        if (partner[idx[k]] === idx[(k + 1) % n]) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pairs = idx.map(function (a, k) { return [list[a].name, list[idx[(k + 1) % n]].name]; });
+      if (previous && sameMapping(pairs, previous) && repeats < 300) {
+        repeats++; fallback = pairs; continue;
+      }
+      return pairs;
+    }
+    return fallback;
+  }
+
+  function prep(name) { return /^[aàAÀ]/.test(name) ? 'ad' : 'a'; }
+
+  /* ---------- interfaccia ---------- */
+  function showStep(step, focus) {
+    state.step = step;
+    [1, 2, 3].forEach(function (s) { $('p' + s).hidden = s !== step; });
+    document.querySelectorAll('.steps li').forEach(function (li) {
+      var s = Number(li.getAttribute('data-step'));
+      if (s === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+      li.classList.toggle('done', s < step);
+    });
+    if (focus) {
+      window.scrollTo(0, 0);
+      var h = $('p' + step).querySelector('h2');
+      if (h) h.focus({ preventScroll: true });
+    }
+    save();
+  }
+
+  /* Passo 1 */
+  function renderCounts() {
+    $('n-val').textContent = state.n;
+    $('c-val').textContent = state.c;
+    document.querySelector('[data-act="n-"]').disabled = state.n <= MIN_N;
+    document.querySelector('[data-act="n+"]').disabled = state.n >= MAX_N;
+    document.querySelector('[data-act="c-"]').disabled = state.c <= 0;
+    document.querySelector('[data-act="c+"]').disabled = state.c >= Math.floor(state.n / 2);
+    $('summary').textContent = summaryText(state.n, state.c);
+    var f = feasibility(state.n, state.c);
+    $('feas').hidden = !f;
+    $('feas').textContent = f || '';
+    $('to-names').disabled = !!f;
+  }
+
+  document.querySelectorAll('[data-act]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var a = b.getAttribute('data-act');
+      if (a === 'n-') state.n--;
+      if (a === 'n+') state.n++;
+      if (a === 'c-') state.c--;
+      if (a === 'c+') state.c++;
+      normalize();
+      renderCounts();
+      save();
+    });
+  });
+
+  $('to-names').addEventListener('click', function () {
+    if (feasibility(state.n, state.c)) return;
+    normalize();
+    buildNameFields();
+    showStep(2, true);
+  });
+
+  /* Passo 2 */
+  function makeField(value, label, placeholder, onInput) {
+    var inp = document.createElement('input');
+    inp.className = 'field';
+    inp.type = 'text';
+    inp.value = value;
+    inp.placeholder = placeholder;
+    inp.setAttribute('aria-label', label);
+    inp.autocomplete = 'off';
+    inp.setAttribute('autocapitalize', 'words');
+    inp.setAttribute('autocorrect', 'off');
+    inp.spellcheck = false;
+    inp.maxLength = 30;
+    inp.setAttribute('enterkeyhint', 'next');
+    inp.addEventListener('input', function () { onInput(inp.value); checkNames(); save(); });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var all = Array.prototype.slice.call(document.querySelectorAll('#p2 .field'));
+      var i = all.indexOf(inp);
+      if (i >= 0 && i < all.length - 1) all[i + 1].focus(); else inp.blur();
+    });
+    return inp;
+  }
+
+  function buildNameFields() {
+    var cBox = $('couples'), sBox = $('singles');
+    cBox.innerHTML = ''; sBox.innerHTML = '';
+    $('couples-group').hidden = state.c === 0;
+    $('singles-group').hidden = state.singles.length === 0;
+
+    state.couples.forEach(function (p, i) {
+      var row = document.createElement('div');
+      row.className = 'couple';
+      row.appendChild(makeField(p[0], 'Coppia ' + (i + 1) + ', prima persona', 'Nome', function (v) { state.couples[i][0] = v; }));
+      var amp = document.createElement('span');
+      amp.className = 'amp';
+      amp.setAttribute('aria-hidden', 'true');
+      amp.textContent = '&';
+      row.appendChild(amp);
+      row.appendChild(makeField(p[1], 'Coppia ' + (i + 1) + ', partner', 'Partner', function (v) { state.couples[i][1] = v; }));
+      cBox.appendChild(row);
+    });
+    state.singles.forEach(function (x, i) {
+      sBox.appendChild(makeField(x, 'Single ' + (i + 1), 'Nome', function (v) { state.singles[i] = v; }));
+    });
+    checkNames();
+  }
+
+  function checkNames() {
+    var pr = namesProblem();
+    var st = $('names-status');
+    document.querySelectorAll('#p2 .field').forEach(function (f) {
+      var bad = pr && pr.dup && f.value.trim().toLocaleLowerCase('it') === pr.dup;
+      if (bad) f.setAttribute('aria-invalid', 'true'); else f.removeAttribute('aria-invalid');
+    });
+    if (pr) {
+      st.textContent = pr.msg;
+      st.classList.toggle('is-warn', !!pr.dup);
+      $('start').hidden = true;
+      $('start-hint').hidden = false;
+    } else {
+      st.textContent = 'Tutto pronto.';
+      st.classList.remove('is-warn');
+      $('start').hidden = false;
+      $('start-hint').hidden = true;
+    }
+  }
+
+  $('back-1').addEventListener('click', function () { renderCounts(); showStep(1, true); });
+
+  $('start').addEventListener('click', function () {
+    if (namesProblem()) return;
+    var pairs = drawCycle(allNames(), null);
+    if (!pairs) { toast('Estrazione non riuscita: riprova.'); return; }
+    state.result = pairs;
+    state.round = 1;
+    state.confirmed = false;
+    renderResult(true);
+    showStep(3, true);
+  });
+
+  /* Passo 3 */
+  function renderResult(animate) {
+    var ol = $('chain');
+    ol.innerHTML = '';
+    ol.classList.toggle('confirmed', state.confirmed);
+    state.result.forEach(function (p, i) {
+      var li = document.createElement('li');
+      if (animate) { li.className = 'reveal'; li.style.animationDelay = (i * 60) + 'ms'; }
+      var a = document.createElement('span'); a.className = 'name'; a.textContent = p[0];
+      var v = document.createElement('span'); v.className = 'verb'; v.textContent = ' fa il regalo ' + prep(p[1]) + ' ';
+      var b = document.createElement('span'); b.className = 'name'; b.textContent = p[1];
+      li.appendChild(a); li.appendChild(v); li.appendChild(b);
+      ol.appendChild(li);
+    });
+
+    var title = $('res-title');
+    if (state.confirmed) {
+      title.textContent = 'Estrazione confermata ';
+      var seal = document.createElement('span');
+      seal.className = 'seal';
+      seal.textContent = 'n. ' + state.round;
+      title.appendChild(seal);
+      $('res-sub').textContent = 'Ecco chi fa il regalo a chi.';
+    } else {
+      title.textContent = 'Ecco l’estrazione';
+      $('res-sub').textContent = 'Estrazione n. ' + state.round + '. La confermi?';
+    }
+    $('act-draft').hidden = state.confirmed;
+    $('edit-names').hidden = state.confirmed;
+    $('act-done').hidden = !state.confirmed;
+    resetRestart();
+  }
+
+  $('redraw').addEventListener('click', function () {
+    var pairs = drawCycle(allNames(), state.result);
+    if (!pairs) { toast('Estrazione non riuscita: riprova.'); return; }
+    state.result = pairs;
+    state.round++;
+    renderResult(true);
+    save();
+  });
+
+  $('confirm').addEventListener('click', function () {
+    state.confirmed = true;
+    renderResult(false);
+    save();
+    toast('Estrazione confermata');
+  });
+
+  $('edit-names').addEventListener('click', function () {
+    state.result = null; state.round = 0; state.confirmed = false;
+    buildNameFields();
+    showStep(2, true);
+  });
+
+  var restartArmed = false, restartTimer = null;
+  function resetRestart() {
+    restartArmed = false;
+    clearTimeout(restartTimer);
+    $('restart').textContent = 'Ricomincia';
+  }
+  $('restart').addEventListener('click', function () {
+    if (!restartArmed) {
+      restartArmed = true;
+      $('restart').textContent = 'Tocca di nuovo';
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(resetRestart, 3000);
+      return;
+    }
+    resetRestart();
+    state.result = null; state.round = 0; state.confirmed = false;
+    renderCounts();
+    showStep(1, true);
+  });
+
+  $('copy').addEventListener('click', function () {
+    var text = 'Chi regala a chi\n\n' + state.result.map(function (p) {
+      return p[0] + ' fa il regalo ' + prep(p[1]) + ' ' + p[1];
+    }).join('\n');
+    if (canShare) {
+      navigator.share({ title: 'Chi regala a chi', text: text }).catch(function (e) {
+        if (e && e.name === 'AbortError') return;
+        copyText(text).then(function (ok) {
+          toast(ok ? 'Lista copiata' : 'Copia non riuscita: tieni premuto sulla lista per selezionarla.');
+        });
+      });
+      return;
+    }
+    copyText(text).then(function (ok) {
+      toast(ok ? 'Lista copiata' : 'Copia non riuscita: tieni premuto sulla lista per selezionarla.');
+    });
+  });
+
+  function copyText(text) {
+    var fallback = function () {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      } catch (e) { return false; }
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallback(); });
+      }
+    } catch (e) { /* si passa al metodo alternativo */ }
+    return Promise.resolve(fallback());
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+
+  /* ---------- avvio ---------- */
+  var canShare = typeof navigator.share === 'function';
+  if (canShare) $('copy').textContent = 'Condividi lista';
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () { /* l’app funziona comunque online */ });
+    });
+  }
+
+  load();
+  normalize();
+  renderCounts();
+  if (state.step === 3 && state.result && state.result.length === state.n) {
+    buildNameFields();
+    renderResult(false);
+    showStep(3, false);
+  } else if (state.step >= 2 && !feasibility(state.n, state.c)) {
+    state.result = null; state.confirmed = false; state.round = 0;
+    buildNameFields();
+    showStep(2, false);
+  } else {
+    showStep(1, false);
+  }
+})();
+</script>
+</body>
+</html>
